@@ -1,42 +1,52 @@
 import streamlit as st
 
-st.set_page_config(page_title="내신 등급 계산기", page_icon="📚", layout="wide")
+st.set_page_config(page_title="내신 목표 계산기", page_icon="📚", layout="wide")
 
-st.title("📊 내신 등급 계산기")
-st.write("👉 현재 내신과 목표 내신을 입력하면, 학년별 반영비율을 고려하여 최종 내신을 계산해드립니다!")
+st.title("🎯 내신 목표 달성 계산기")
+st.write("👉 학기별 내신과 반영 비율을 입력하면, 앞으로 몇 등급을 받아야 목표 내신을 달성할 수 있는지 계산해드립니다!")
 
 # ------------------------
-# 입력 파트
+# 입력
 # ------------------------
-st.subheader("1️⃣ 현재 내신 등급 입력")
-grade1 = st.number_input("1학년 내신 등급 (없으면 0 입력)", min_value=0.0, max_value=9.0, step=0.1, value=0.0)
-grade2 = st.number_input("2학년 내신 등급 (없으면 0 입력)", min_value=0.0, max_value=9.0, step=0.1, value=0.0)
-grade3 = st.number_input("3학년 내신 등급 (없으면 0 입력)", min_value=0.0, max_value=9.0, step=0.1, value=0.0)
+st.subheader("1️⃣ 학기별 내신 입력 (없으면 0 입력)")
+grades = {}
+for semester in ["1-1", "1-2", "2-1", "2-2", "3-1", "3-2"]:
+    grades[semester] = st.number_input(f"{semester} 등급", min_value=0.0, max_value=9.0, step=0.1, value=0.0)
 
-st.subheader("2️⃣ 목표 내신 등급 입력")
+st.subheader("2️⃣ 학기별 반영 비율 (%)")
+weights = {}
+for semester in ["1-1", "1-2", "2-1", "2-2", "3-1", "3-2"]:
+    weights[semester] = st.slider(f"{semester} 반영 비율", 0, 100, 20)
+
+st.subheader("3️⃣ 목표 내신 등급 입력")
 target = st.number_input("목표 내신 등급", min_value=1.0, max_value=9.0, step=0.1, value=2.0)
-
-st.subheader("3️⃣ 학년별 반영 비율 (%)")
-weight1 = st.slider("1학년 반영 비율", 0, 100, 20)
-weight2 = st.slider("2학년 반영 비율", 0, 100, 40)
-weight3 = st.slider("3학년 반영 비율", 0, 100, 40)
-
-# 비율 합계가 100이 아닐 경우 보정
-total_weight = weight1 + weight2 + weight3
-if total_weight != 100:
-    st.warning("⚠️ 반영 비율의 합은 100%가 되어야 합니다!")
 
 # ------------------------
 # 계산
 # ------------------------
-if st.button("📌 내신 계산하기"):
-    if total_weight == 100:
-        weighted_sum = (grade1 * weight1 + grade2 * weight2 + grade3 * weight3) / 100
-        st.success(f"🎓 현재 예상 최종 내신 등급: **{weighted_sum:.2f} 등급**")
+if st.button("📌 목표 달성 가능 여부 확인"):
+    total_weight = sum(weights.values())
 
-        if weighted_sum <= target:
-            st.balloons()
-            st.info(f"👏 목표 내신 {target:.2f} 등급 달성이 가능합니다!")
+    if total_weight != 100:
+        st.warning("⚠️ 반영 비율의 합은 100%가 되어야 합니다!")
+    else:
+        # 이미 나온 학기와 아직 남은 학기를 구분
+        achieved = {s: g for s, g in grades.items() if g > 0}
+        remaining = [s for s, g in grades.items() if g == 0]
+
+        # 이미 나온 학기 점수 (가중합)
+        achieved_score = sum(grades[s] * weights[s] for s in achieved) / 100
+        achieved_weight = sum(weights[s] for s in achieved) / 100
+
+        remaining_weight = 1 - achieved_weight
+
+        if remaining_weight <= 0:
+            st.info("✅ 모든 학기 성적이 입력되었습니다!")
         else:
-            diff = weighted_sum - target
-            st.warning(f"😅 현재 계산 결과는 {weighted_sum:.2f} 등급으로, 목표보다 {diff:.2f} 등급 높습니다. 더 노력해야 해요!")
+            # 남은 학기에서 필요한 평균 등급
+            required_avg = (target - achieved_score) / remaining_weight
+
+            if required_avg <= 9:
+                st.success(f"📊 남은 {len(remaining)}학기에서 평균 **{required_avg:.2f} 등급**을 받으면 목표({target}등급) 달성 가능!")
+            else:
+                st.error("😭 목표 달성이 불가능합니다. 목표를 조정하거나 더 높은 성적이 필요합니다.")
