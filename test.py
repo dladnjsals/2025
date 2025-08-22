@@ -1,34 +1,30 @@
 import streamlit as st
-import time
 
-st.title("👀 눈 건강 타이머 - 20-20-20 규칙")
+st.title("🍬 당뇨병 위험도 계산기 (교육용)")
 
-if "phase" not in st.session_state:
-    st.session_state.phase = "study"
-    st.session_state.start_time = None
+age = st.slider("나이", 10, 80, 18)
+bmi = st.slider("BMI (체질량지수)", 10.0, 40.0, 22.0)
+family_history = st.selectbox("가족 중 당뇨병 환자가 있나요?", ["없음", "있음"])
+exercise = st.selectbox("주 3회 이상 운동을 하나요?", ["예", "아니오"])
 
-if st.button("타이머 시작"):
-    st.session_state.phase = "study"
-    st.session_state.start_time = time.time()
+# 위험 점수 계산 (아주 간단하게)
+risk = 0
+if age > 45:
+    risk += 2
+if bmi > 25:
+    risk += 2
+if family_history == "있음":
+    risk += 3
+if exercise == "아니오":
+    risk += 2
 
-if st.session_state.start_time:
-    elapsed = time.time() - st.session_state.start_time
-    
-    if st.session_state.phase == "study":
-        remaining = 20*60 - int(elapsed)
-        if remaining > 0:
-            st.subheader(f"📖 공부 시간 남음: {remaining//60}분 {remaining%60}초")
-        else:
-            st.session_state.phase = "rest"
-            st.session_state.start_time = time.time()
-    
-    elif st.session_state.phase == "rest":
-        remaining = 20 - int(elapsed)
-        if remaining > 0:
-            st.subheader(f"👀 휴식 시간 남음: {remaining}초")
-            st.write("👉 20피트 떨어진 곳을 바라보세요!")
-        else:
-            st.session_state.phase = "study"
-            st.session_state.start_time = time.time()
-            st.success("✅ 휴식 끝! 다시 공부를 시작하세요.")
+# 위험도 단계
+if risk <= 2:
+    result = "낮음"
+elif risk <= 5:
+    result = "보통"
+else:
+    result = "높음"
 
+st.subheader(f"👉 당신의 당뇨병 위험도는: **{result}**")
+st.progress(min(risk/7, 1.0))
