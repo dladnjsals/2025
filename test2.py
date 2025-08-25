@@ -1,8 +1,6 @@
 import streamlit as st
 import time
 
-st.set_page_config(page_title="눈 건강 타이머", page_icon="👀", layout="centered")
-
 st.title("👀 눈 건강 타이머 ")
 
 # 초기 세션 상태
