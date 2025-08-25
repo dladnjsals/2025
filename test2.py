@@ -9,8 +9,8 @@ if "phase" not in st.session_state:
 
 # 사용자 입력 (공부 시간, 휴식 시간)
 st.sidebar.header("⚙️ 타이머 설정")
-study_minutes = st.sidebar.slider("공부 시간 (분)", 5, 60, 20)
-rest_seconds = st.sidebar.slider("휴식 시간 (초)", 10, 120, 20)
+study_minutes = st.sidebar.slider("공부 시간 (분)", 5, 60)
+rest_seconds = st.sidebar.slider("휴식 시간 (초)", 10, 120)
 
 # 버튼을 화면 가운데 배치
 col1, col2, col3 = st.columns([1,2,1])
