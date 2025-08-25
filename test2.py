@@ -14,7 +14,7 @@ col1, col2, col3 = st.columns([1,2,1])
 with col2:
     if st.button("▶️ 타이머 시작", use_container_width=True):
         st.session_state.phase = "study"
-        st.experimental_rerun()
+        st.rerun()
 
 # 공부 단계
 if st.session_state.phase == "study":
@@ -27,7 +27,7 @@ if st.session_state.phase == "study":
         progress_bar.progress(int((20*60-sec)/(20*60)*100))
         time.sleep(1)
     st.session_state.phase = "rest"
-    st.experimental_rerun()
+    st.rerun()
 
 # 휴식 단계
 elif st.session_state.phase == "rest":
@@ -38,4 +38,4 @@ elif st.session_state.phase == "rest":
         time.sleep(1)
     st.success("✅ 휴식 끝! 다시 공부를 시작하세요 🚀")
     st.session_state.phase = "study"
-    st.experimental_rerun()
+    st.rerun()
